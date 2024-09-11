@@ -27,4 +27,8 @@ def post(param):
         return f
     return decorator
 
-
+def delete(param):
+    def decorator(f):
+        endpoints.append(('DELETE', param, f))
+        return f
+    return decorator
