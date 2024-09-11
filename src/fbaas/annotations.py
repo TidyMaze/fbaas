@@ -1,37 +1,37 @@
+from inspect import isclass
+
 endpoints = []
+
+def add_watcher_to(stuff, path='root'):
+    print(f'Watching {stuff} at path {path} that is a {type(stuff)}')
+    
+    if isinstance(stuff, dict):
+        for attr in dir(stuff):
+            if not attr.startswith('_'):
+                print(f'Attribute {attr} is a {type(getattr(stuff, attr))}')
+                child_path = f'{path}.{attr}'
+                add_watcher_to(getattr(stuff, attr), child_path)
+    elif isinstance(stuff, list):
+        for i, item in enumerate(stuff):
+            child_path = f'{path}[{i}]'
+            add_watcher_to(item, child_path)
+    elif isclass(stuff):
+        print(f'Class {stuff.__name__}')
+        for attr in dir(stuff):
+            if not attr.startswith('_'):
+                print(f'Attribute {attr} is a {type(getattr(stuff, attr))}')
+                child_path = f'{path}.{attr}'
+                add_watcher_to(getattr(stuff, attr), child_path)
+    else:
+        print(f'Unknown type {type(stuff)}')
+    
 
 # state decorator synchronises the state with the storage
 def state():
     def decorator(cls):
         print(f'Registering state {cls.__name__}')
+        add_watcher_to(cls)
     
-        # redefine the __setattr__ method to synchronise the state with the storage
-        def __setattr__(self, name, value):
-            print(f'Updating state {name} with value {value}')
-            super(cls, self).__setattr__(name, value)
-            
-            if isinstance(value, dict):
-                print(f'Watching attribute {name}')
-                setattr(self, name, __setattr__)
-                
-                for attr in dir(value):
-                    if not attr.startswith('_'):
-                        print(f'Attribute {attr} is a {type(getattr(value, attr))}')
-                        if isinstance(getattr(value, attr), (list, dict)):
-                            print(f'Watching attribute {attr}')
-                            setattr(value, attr, __setattr__)
-            else:
-                print(f'Attribute {name} is a {type(value)}')
-                    
-            
-        cls.__setattr__ = __setattr__
-        
-        # also define the __setattr__ method for all fields of the class itself (deep)
-        for attr in dir(cls):
-            if not attr.startswith('_') and isinstance(getattr(cls, attr), (list, dict)):
-                print(f'Watching attribute {attr}')
-                setattr(cls, attr, __setattr__)
-        
         return cls
     return decorator
 

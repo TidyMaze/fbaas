@@ -27,7 +27,7 @@ class State:
 my_state = State()
 my_state.lol = 1
 my_state.another = { "a": 1, "b": 2 }
-my_state.banned_user['name'] = "David"
+my_state.banned_user['name'] = "Charlie"
 
 
 @fbaas.annotations.get("/users")
