@@ -1,4 +1,4 @@
-from inspect import isclass
+from inspect import isclass, isbuiltin
 
 endpoints = []
 
@@ -7,7 +7,7 @@ def add_watcher_to(stuff, path='root'):
     
     if isinstance(stuff, dict):
         for attr in dir(stuff):
-            if not attr.startswith('_'):
+            if not attr.startswith('_') and not callable(getattr(stuff, attr)) and not isbuiltin(getattr(stuff, attr)):
                 print(f'Attribute {attr} is a {type(getattr(stuff, attr))}')
                 child_path = f'{path}.{attr}'
                 add_watcher_to(getattr(stuff, attr), child_path)
@@ -18,7 +18,7 @@ def add_watcher_to(stuff, path='root'):
     elif isclass(stuff):
         print(f'Class {stuff.__name__}')
         for attr in dir(stuff):
-            if not attr.startswith('_'):
+            if not attr.startswith('_') and not callable(getattr(stuff, attr)) and not isbuiltin(getattr(stuff, attr)):
                 print(f'Attribute {attr} is a {type(getattr(stuff, attr))}')
                 child_path = f'{path}.{attr}'
                 add_watcher_to(getattr(stuff, attr), child_path)
