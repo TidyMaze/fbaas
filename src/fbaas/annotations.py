@@ -15,10 +15,11 @@ def state():
                 setattr(self, name, __setattr__)
                 
                 for attr in dir(value):
-                    print(f'Attribute {attr} is a {type(getattr(value, attr))}')
-                    if not attr.startswith('_') and isinstance(getattr(value, attr), (list, dict)):
-                        print(f'Watching attribute {attr}')
-                        setattr(value, attr, __setattr__)
+                    if not attr.startswith('_'):
+                        print(f'Attribute {attr} is a {type(getattr(value, attr))}')
+                        if isinstance(getattr(value, attr), (list, dict)):
+                            print(f'Watching attribute {attr}')
+                            setattr(value, attr, __setattr__)
             else:
                 print(f'Attribute {name} is a {type(value)}')
                     
