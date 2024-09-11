@@ -25,6 +25,12 @@ def state():
             
         cls.__setattr__ = __setattr__
         
+        # also define the __setattr__ method for all fields of the class itself (deep)
+        for attr in dir(cls):
+            if not attr.startswith('_') and isinstance(getattr(cls, attr), (list, dict)):
+                print(f'Watching attribute {attr}')
+                setattr(cls, attr, __setattr__)
+        
         return cls
     return decorator
 
