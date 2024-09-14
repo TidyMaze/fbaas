@@ -81,44 +81,44 @@ def build_state():
 def test_assign_root_scalar():
     state = build_state()
     state['a'] = 2
-    assert state == {'a': 2, 'b': [{'c': 3, 'd': 4}], 'e': {'f': 6}}
+    assert state._wrapped == {'a': 2, 'b': [{'c': 3, 'd': 4}], 'e': {'f': 6}}
     
 def test_assign_root_list():
     state = build_state()
     state['b'] = [{'c': 3, 'd': 4}, {'c': 5, 'd': 6}]
-    assert state == {'a': 1, 'b': [{'c': 3, 'd': 4}, {'c': 5, 'd': 6}], 'e': {'f': 6}}
+    assert state._wrapped == {'a': 1, 'b': [{'c': 3, 'd': 4}, {'c': 5, 'd': 6}], 'e': {'f': 6}}
 
 def test_assign_root_dict():
     state = build_state()
     state['e'] = {'f': 7}
-    assert state == {'a': 1, 'b': [{'c': 3, 'd': 4}], 'e': {'f': 7}}
+    assert state._wrapped == {'a': 1, 'b': [{'c': 3, 'd': 4}], 'e': {'f': 7}}
     
 def test_assign_list_item_scalar():
     state = build_state()
     state['b'][0]['c'] = 5
-    assert state == {'a': 1, 'b': [{'c': 5, 'd': 4}], 'e': {'f': 6}}
+    assert state._wrapped == {'a': 1, 'b': [{'c': 5, 'd': 4}], 'e': {'f': 6}}
     
 def test_assign_list_item_list():
     state = build_state()
     state['b'][0] = {'c': 5, 'd': 6}
-    assert state == {'a': 1, 'b': [{'c': 5, 'd': 6}], 'e': {'f': 6}}
+    assert state._wrapped == {'a': 1, 'b': [{'c': 5, 'd': 6}], 'e': {'f': 6}}
     
 def test_assign_list_item_dict():
     state = build_state()
     state['b'][0] = {'c': 5}
-    assert state == {'a': 1, 'b': [{'c': 5}], 'e': {'f': 6}}
+    assert state._wrapped == {'a': 1, 'b': [{'c': 5}], 'e': {'f': 6}}
 
 def test_assign_dict_item_scalar():
     state = build_state()
     state['e']['f'] = 7
-    assert state == {'a': 1, 'b': [{'c': 3, 'd': 4}], 'e': {'f': 7}}
+    assert state._wrapped == {'a': 1, 'b': [{'c': 3, 'd': 4}], 'e': {'f': 7}}
     
 def test_assign_dict_item_list():
     state = build_state()
     state['e']['f'] = [7]
-    assert state == {'a': 1, 'b': [{'c': 3, 'd': 4}], 'e': {'f': [7]}}
+    assert state._wrapped == {'a': 1, 'b': [{'c': 3, 'd': 4}], 'e': {'f': [7]}}
     
 def test_assign_dict_item_dict():
     state = build_state()
     state['e']['f'] = {'g': 7}
-    assert state == {'a': 1, 'b': [{'c': 3, 'd': 4}], 'e': {'f': {'g': 7}}}
+    assert state._wrapped == {'a': 1, 'b': [{'c': 3, 'd': 4}], 'e': {'f': {'g': 7}}}
