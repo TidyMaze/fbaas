@@ -28,7 +28,7 @@ class ObservableDict:
 class ObservableList:
     def __init__(self, wrapped, observer):
         self._observer = observer
-        self._wrapped = wrapped
+        self._wrapped: list = wrapped
     
     def __setitem__(self, key, value):
         self._wrapped[key] = wrap(value, self._observer)
