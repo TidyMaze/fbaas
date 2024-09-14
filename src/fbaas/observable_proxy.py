@@ -37,6 +37,9 @@ class ObservableList:
     def _notify(self):
         print('Notifying changes')
         self._observer.notify()
+        
+    def __eq__(self, other):
+        return self._wrapped == other
 
 def is_wrapped(state):
     return isinstance(state, ObservableDict) or isinstance(state, ObservableList)
