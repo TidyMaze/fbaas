@@ -68,7 +68,7 @@ class Observer:
         print(f'Changes detected: {state}')
 
 def build_state():
-    state = {
+    state: dict | list = {
         'a': 1,
         'b': [{'c': 3, 'd': 4}],
         'e': {'f': 6}
