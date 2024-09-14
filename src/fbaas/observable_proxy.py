@@ -24,6 +24,9 @@ class ObservableDict:
     
     def __str__(self):
         return f'ObservableDict({self._wrapped})'
+    
+    def __repr__(self):
+        return f'ObservableDict({self._wrapped})'
 
 class ObservableList:
     def __init__(self, wrapped, observer):
@@ -45,6 +48,9 @@ class ObservableList:
         return self._wrapped == other
 
     def __str__(self):
+        return f'ObservableList({self._wrapped})'
+    
+    def __repr__(self):
         return f'ObservableList({self._wrapped})'
 
 def is_wrapped(state):
