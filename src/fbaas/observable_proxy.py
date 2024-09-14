@@ -1,79 +1,107 @@
 from deepdiff import DeepDiff
 
-class ObservableProxy:
-
-    non_observable_fields = ['_observers', '_previous_state', '_obj']
-
-    def __init__(self, obj):
-        self.__dict__['_obj'] = self._wrap(obj)
-        self.__dict__['_observers'] = []
-        self.__dict__['_previous_state'] = self._obj.copy()
-
-    def _wrap(self, value):
-        """Recursively wrap dictionaries and lists in ObservableProxy."""
-        if isinstance(value, dict):
-            return {k: self._wrap(v) for k, v in value.items()}
-        elif isinstance(value, list):
-            return [self._wrap(item) for item in value]
-        else:
-            return value
-
-    def add_observer(self, observer):
-        self._observers.append(observer)
-
-    def notify(self, diff):
-        for observer in self._observers:
-            observer.update(diff)
-
-    def _check_for_changes(self):
-        """Check if there are any changes and notify observers."""
-        diff = DeepDiff(self._previous_state, self._obj, ignore_order=True)
-        if diff:
-            self.notify(diff)
-            self._previous_state = self._obj.copy()  # Update the previous state
-
-    def __setattr__(self, key, value):
-        """Intercept attribute setting."""
-        
-        if key in self.non_observable_fields:
-            self.__dict__[key] = value
-            return
-        
-        old_obj = self._obj
-        self._obj[key] = self._wrap(value)
-        self._check_for_changes()
+class ObservableDict:
+    def __init__(self, wrapped, observer):
+        self._observer = observer
+        self._wrapped = wrapped
+    
+    def __setitem__(self, key, value):
+        self._wrapped[key] = wrap(value)
+        self._notify()
 
     def __getitem__(self, key):
-        """Intercept item getting."""
-        return self._wrap(self._obj[key])
+        return self._wrapped[key]
 
+    def _notify(self):
+        print('Notifying changes')
+        self._observer.notify()
+
+class ObservableList:
+    def __init__(self, wrapped, observer):
+        self._observer = observer
+        self._wrapped = wrapped
+    
     def __setitem__(self, key, value):
-        """Intercept item setting for lists and dictionaries."""
-        old_obj = self._obj.copy()
-        self._obj[key] = self._wrap(value)
-        self._check_for_changes()
+        self._wrapped[key] = wrap(value)
+        self._notify()
 
-    def set_obj(self, new_obj):
-        """Replace the whole object and notify observers."""
-        self._obj = self._wrap(new_obj)
-        self._check_for_changes()
+    def __getitem__(self, key):
+        return self._wrapped[key]
+
+    def _notify(self):
+        print('Notifying changes')
+        self._observer.notify()
+
+def is_wrapped(state):
+    return isinstance(state, ObservableDict) or isinstance(state, ObservableList)
+
+def wrap(state, observer):
+    if is_wrapped(state):
+        return state
+    
+    if isinstance(state, dict):
+        return ObservableDict(state, observer)
+    elif isinstance(state, list):
+        return ObservableList(state, observer)
+    else:
+        raise ValueError(f'Unsupported type {type(state)}')
 
 class Observer:
-    def update(self, diff):
-        print("Detected change:", diff)
+    def notify(self):
+        print('Notified')
 
-# Usage Example
-data = {'a': 1, 'b': {'c': 3, 'd': [4, 5]}}
-observable = ObservableProxy(data)
-observer = Observer()
+def build_state():
+    state = {
+        'a': 1,
+        'b': [{'c': 3, 'd': 4}],
+        'e': {'f': 6}
+    }
+    
+    observer = Observer()
+    
+    return wrap(state, observer)
 
-# Add observer
-observable.add_observer(observer)
+def test_assign_root_scalar():
+    state = build_state()
+    state['a'] = 2
+    assert state == {'a': 2, 'b': [{'c': 3, 'd': 4}], 'e': {'f': 6}}
+    
+def test_assign_root_list():
+    state = build_state()
+    state['b'] = [{'c': 3, 'd': 4}, {'c': 5, 'd': 6}]
+    assert state == {'a': 1, 'b': [{'c': 3, 'd': 4}, {'c': 5, 'd': 6}], 'e': {'f': 6}}
 
-# Modify data at various levels
-observable['a'] = 2  # Change at the root level
-observable['b']['c'] = 4  # Change in nested dict
-observable['b']['d'][1] = 6  # Change in nested list
+def test_assign_root_dict():
+    state = build_state()
+    state['e'] = {'f': 7}
+    assert state == {'a': 1, 'b': [{'c': 3, 'd': 4}], 'e': {'f': 7}}
+    
+def test_assign_list_item_scalar():
+    state = build_state()
+    state['b'][0]['c'] = 5
+    assert state == {'a': 1, 'b': [{'c': 5, 'd': 4}], 'e': {'f': 6}}
+    
+def test_assign_list_item_list():
+    state = build_state()
+    state['b'][0] = {'c': 5, 'd': 6}
+    assert state == {'a': 1, 'b': [{'c': 5, 'd': 6}], 'e': {'f': 6}}
+    
+def test_assign_list_item_dict():
+    state = build_state()
+    state['b'][0] = {'c': 5}
+    assert state == {'a': 1, 'b': [{'c': 5}], 'e': {'f': 6}}
 
-# Replace the entire object
-observable.set_obj({'a': 1, 'b': {'c': 3, 'd': [4, 7]}})
+def test_assign_dict_item_scalar():
+    state = build_state()
+    state['e']['f'] = 7
+    assert state == {'a': 1, 'b': [{'c': 3, 'd': 4}], 'e': {'f': 7}}
+    
+def test_assign_dict_item_list():
+    state = build_state()
+    state['e']['f'] = [7]
+    assert state == {'a': 1, 'b': [{'c': 3, 'd': 4}], 'e': {'f': [7]}}
+    
+def test_assign_dict_item_dict():
+    state = build_state()
+    state['e']['f'] = {'g': 7}
+    assert state == {'a': 1, 'b': [{'c': 3, 'd': 4}], 'e': {'f': {'g': 7}}}
