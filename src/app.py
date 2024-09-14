@@ -10,6 +10,7 @@
 # 7. The user doesn't need to write any code to synchronise the state with the storage
 # 8. The user doesn't need to know the storage technology
 import flask.app
+import psycopg2
 
 import fbaas.annotations
 
@@ -84,5 +85,29 @@ for path, methods in rules.items():
     print(f'Registering path {path} with methods {all_methods}. Functions: {methods}')
     
     app.add_url_rule(path, view_func=create_view_func(path, methods), methods=all_methods)
+
+def create_database():
+    """Creates the main table: state using the library of choice, psycopg2"""
+    DATABASE_URL = "postgresql://postgres:postgres@localhost:5432/postgres"
+    
+    query_table = """
+    CREATE TABLE state (
+        id SERIAL PRIMARY KEY,
+        data JSONB
+    );
+    """
+    with psycopg2.connect(DATABASE_URL) as conn:
+        conn.autocommit = True
+        with conn.cursor() as cursor:
+            cursor.execute(query_table)
+            
+    
+    
+
+def initialize_storage():
+    """Initializes the storage (database): creates the tables, etc."""
+    create_database()
+
+initialize_storage()
 
 app.run()

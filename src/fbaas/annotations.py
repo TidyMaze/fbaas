@@ -1,29 +1,8 @@
 from inspect import isclass, isbuiltin
 
-endpoints = []
+from fbaas.observable_proxy import add_watcher_to
 
-def add_watcher_to(stuff, path='root'):
-    print(f'Watching {stuff} at path {path} that is a {type(stuff)}')
-    
-    if isinstance(stuff, dict):
-        for attr in dir(stuff):
-            if not attr.startswith('_') and not callable(getattr(stuff, attr)) and not isbuiltin(getattr(stuff, attr)):
-                print(f'Attribute {attr} is a {type(getattr(stuff, attr))}')
-                child_path = f'{path}.{attr}'
-                add_watcher_to(getattr(stuff, attr), child_path)
-    elif isinstance(stuff, list):
-        for i, item in enumerate(stuff):
-            child_path = f'{path}[{i}]'
-            add_watcher_to(item, child_path)
-    elif isclass(stuff):
-        print(f'Class {stuff.__name__}')
-        for attr in dir(stuff):
-            if not attr.startswith('_') and not callable(getattr(stuff, attr)) and not isbuiltin(getattr(stuff, attr)):
-                print(f'Attribute {attr} is a {type(getattr(stuff, attr))}')
-                child_path = f'{path}.{attr}'
-                add_watcher_to(getattr(stuff, attr), child_path)
-    else:
-        print(f'Unknown type {type(stuff)}')
+endpoints = []
     
 
 # state decorator synchronises the state with the storage

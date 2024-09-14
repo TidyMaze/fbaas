@@ -8,6 +8,8 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.12"
 flask = "^3.0.3"
+psycopg2 = "^2.9.9"
+deepdiff = "^8.0.1"
 
 
 [build-system]
