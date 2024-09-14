@@ -3,9 +3,10 @@ from idlelib.configdialog import is_int
 from deepdiff import DeepDiff
 
 class ObservableDict:
+    
     def __init__(self, wrapped, observer):
-        self._observer = observer
-        self._wrapped = wrapped
+        self._observer: Observer = observer
+        self._wrapped: dict = wrapped
     
     def __setitem__(self, key, value):
         self._wrapped[key] = wrap(value, self._observer)
