@@ -17,7 +17,7 @@ class ObservableDict:
 
     def _notify(self):
         print('Notifying changes')
-        self._observer.notify()
+        self._observer.notify(self)
         
     def __eq__(self, other):
         return self._wrapped == other
@@ -36,7 +36,7 @@ class ObservableList:
 
     def _notify(self):
         print('Notifying changes')
-        self._observer.notify()
+        self._observer.notify(self)
         
     def __eq__(self, other):
         return self._wrapped == other
@@ -58,8 +58,8 @@ def wrap(state, observer):
         raise ValueError(f'Unsupported type {type(state)}')
 
 class Observer:
-    def notify(self):
-        print('Notified')
+    def notify(self, state):
+        print(f'Changes detected: {state}')
 
 def build_state():
     state = {
