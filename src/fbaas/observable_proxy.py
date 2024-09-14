@@ -1,3 +1,5 @@
+from idlelib.configdialog import is_int
+
 from deepdiff import DeepDiff
 
 class ObservableDict:
@@ -6,7 +8,7 @@ class ObservableDict:
         self._wrapped = wrapped
     
     def __setitem__(self, key, value):
-        self._wrapped[key] = wrap(value)
+        self._wrapped[key] = wrap(value, self._observer)
         self._notify()
 
     def __getitem__(self, key):
@@ -15,6 +17,9 @@ class ObservableDict:
     def _notify(self):
         print('Notifying changes')
         self._observer.notify()
+        
+    def __eq__(self, other):
+        return self._wrapped == other
 
 class ObservableList:
     def __init__(self, wrapped, observer):
@@ -43,6 +48,8 @@ def wrap(state, observer):
         return ObservableDict(state, observer)
     elif isinstance(state, list):
         return ObservableList(state, observer)
+    elif is_int(state):
+        return state
     else:
         raise ValueError(f'Unsupported type {type(state)}')
 
