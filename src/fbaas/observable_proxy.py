@@ -31,7 +31,7 @@ class ObservableList:
         self._wrapped = wrapped
     
     def __setitem__(self, key, value):
-        self._wrapped[key] = wrap(value)
+        self._wrapped[key] = wrap(value, self._observer)
         self._notify()
 
     def __getitem__(self, key):
