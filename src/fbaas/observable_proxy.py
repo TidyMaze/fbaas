@@ -136,12 +136,14 @@ def test_assign_root_dict():
     state, obs = build_state()
     state['e'] = {'f': 7}
     assert state._wrapped == {'a': 1, 'b': [{'c': 3, 'd': 4}], 'e': {'f': 7}}
+    assert obs.notified_diff == {'values_changed': {"root['e']['f']": {'new_value': 7, 'old_value': 6}}}
 
 
 def test_assign_list_item_scalar():
     state, obs = build_state()
     state['b'][0]['c'] = 5
     assert state._wrapped == {'a': 1, 'b': [{'c': 5, 'd': 4}], 'e': {'f': 6}}
+    assert obs.notified_diff == {'values_changed': {"root['b'][0]['c']": {'new_value': 5, 'old_value': 3}}}
 
 
 def test_assign_list_item_list():
