@@ -15,13 +15,13 @@ class ObservableDict:
         # Deep copy the state
         old_state = deepcopy(self._wrapped)
         self._wrapped[key] = wrap(value, self._observer)
-        self._notify(old_state, self._wrapped)
+        self._notify(old_state, unwrap(self._wrapped))
 
     def __getitem__(self, key):
         return self._wrapped[key]
 
     def _notify(self, old_state, new_state):
-        print('Notifying changes')
+        print(f'Notifying changes: {old_state} -> {new_state}') 
         diff = DeepDiff(old_state, new_state)
         self._observer.notify(diff)
 
@@ -40,13 +40,13 @@ class ObservableList:
     def __setitem__(self, key, value):
         old_state = deepcopy(self._wrapped)
         self._wrapped[key] = wrap(value, self._observer)
-        self._notify(old_state, self._wrapped)
+        self._notify(old_state, unwrap(self._wrapped))
 
     def __getitem__(self, key):
         return self._wrapped[key]
 
     def _notify(self, old_state, new_state):
-        print('Notifying changes')
+        print(f'Notifying changes: {old_state} -> {new_state}')
         diff = DeepDiff(old_state, new_state)
         self._observer.notify(diff)
 
@@ -55,25 +55,41 @@ class ObservableList:
 
     def __repr__(self):
         return f'ObservableList({self._wrapped})'
-
-
+    
 def is_wrapped(state):
     return isinstance(state, ObservableDict) or isinstance(state, ObservableList)
 
 
 def wrap(state, observer):
     if is_wrapped(state):
+        print(f'State is already wrapped: {state}')
         return state
 
     if isinstance(state, dict):
+        print(f'Wrapping state {state} in ObservableDict')
         return ObservableDict(state, observer)
     elif isinstance(state, list):
+        print(f'Wrapping state {state} in ObservableList')
         return ObservableList(state, observer)
-    elif is_int(state):
+    elif is_int(state) or isinstance(state, str):
+        print(f'Keeping state {state} as is (scalar)')
         return state
     else:
         raise ValueError(f'Unsupported type {type(state)}')
 
+def unwrap(state):
+    if isinstance(state, ObservableDict):
+        inner = state._wrapped
+        return {k: unwrap(v) for k, v in inner.items()}
+    elif isinstance(state, ObservableList):
+        inner = state._wrapped
+        return [unwrap(v) for v in inner]
+    elif isinstance(state, dict):
+        return {k: unwrap(v) for k, v in state.items()}
+    elif isinstance(state, list):
+        return [unwrap(v) for v in state]
+    else:
+        return state
 
 class Observer(ABC):
     @abstractmethod
@@ -113,6 +129,7 @@ def test_assign_root_list():
     state, obs = build_state()
     state['b'] = [{'c': 3, 'd': 4}, {'c': 5, 'd': 6}]
     assert state._wrapped == {'a': 1, 'b': [{'c': 3, 'd': 4}, {'c': 5, 'd': 6}], 'e': {'f': 6}}
+    assert obs.notified_diff == {'iterable_item_added': {"root['b'][1]": {'c': 5, 'd': 6}}}
 
 
 def test_assign_root_dict():
