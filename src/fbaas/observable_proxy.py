@@ -9,7 +9,7 @@ class ObservableDict:
 
     def __init__(self, wrapped, observer):
         self._observer: Observer = observer
-        self._wrapped: dict = wrapped
+        self._wrapped: dict = {k: wrap(v, observer) for k, v in wrapped.items()}
 
     def __setitem__(self, key, value):
         # Deep copy the state
@@ -35,7 +35,7 @@ class ObservableDict:
 class ObservableList:
     def __init__(self, wrapped, observer):
         self._observer = observer
-        self._wrapped: list = wrapped
+        self._wrapped: list = [wrap(v, observer) for v in wrapped]
 
     def __setitem__(self, key, value):
         old_state = deepcopy(self._wrapped)
