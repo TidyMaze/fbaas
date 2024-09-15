@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from copy import deepcopy
 from idlelib.configdialog import is_int
+from inspect import unwrap
 
 from deepdiff import DeepDiff
 
@@ -12,10 +13,10 @@ class ObservableDict:
         self._wrapped: dict = {k: wrap(v, observer) for k, v in wrapped.items()}
 
     def __setitem__(self, key, value):
-        # Deep copy the state
-        old_state = deepcopy(self._wrapped)
+        old_state_unwrapped = unwrap(deepcopy(self._wrapped))
         self._wrapped[key] = wrap(value, self._observer)
-        self._notify(old_state, unwrap(self._wrapped))
+        new_state_unwrapped = unwrap(self._wrapped)
+        self._notify(old_state_unwrapped, new_state_unwrapped)
 
     def __getitem__(self, key):
         return self._wrapped[key]
@@ -38,9 +39,10 @@ class ObservableList:
         self._wrapped: list = [wrap(v, observer) for v in wrapped]
 
     def __setitem__(self, key, value):
-        old_state = deepcopy(self._wrapped)
+        old_state_unwrapped = unwrap(deepcopy(self._wrapped))
         self._wrapped[key] = wrap(value, self._observer)
-        self._notify(old_state, unwrap(self._wrapped))
+        new_state_unwrapped = unwrap(self._wrapped)
+        self._notify(old_state_unwrapped, new_state_unwrapped)
 
     def __getitem__(self, key):
         return self._wrapped[key]
