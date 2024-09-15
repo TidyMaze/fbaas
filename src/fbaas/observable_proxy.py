@@ -107,6 +107,7 @@ def test_assign_root_scalar():
     state, obs = build_state()
     state['a'] = 2
     assert state._wrapped == {'a': 2, 'b': [{'c': 3, 'd': 4}], 'e': {'f': 6}}
+    assert obs.notified_diff == {'values_changed': {'root[\'a\']': {'new_value': 2, 'old_value': 1}}}
 
 def test_assign_root_list():
     state, obs = build_state()
