@@ -32,6 +32,8 @@ my_state.lol = 1
 my_state.another = { "a": 1, "b": 2 }
 my_state.banned_user['name'] = "Charlie"
 
+print(f'Initial state: {my_state.__dict__}')
+
 
 @fbaas.annotations.get("/users")
 def get_users():

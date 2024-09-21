@@ -79,9 +79,10 @@ def wrap(state, observer):
         # make sure all attributes are wrapped
         items = state.__dict__.copy().items()
         for k, v in items:
-            wrapped_v = wrap(v, observer)
-            print(f'Wrapping attribute {k} in {state} with value {wrapped_v}')
-            state.k = wrapped_v
+            if not k.startswith('__') and not k.endswith('__'):
+                wrapped_v = wrap(v, observer)
+                print(f'Wrapping attribute {k} in {state} with value {wrapped_v}')
+                setattr(state, k, wrapped_v)
         
         # wrap the state itself
         def observed_setattr(self, key, value):
@@ -107,6 +108,7 @@ def wrap(state, observer):
         raise ValueError(f'Unsupported type {type(state)} for {state}')
 
 def unwrap(state):
+    print(f'Unwrapping state {state}')
     if isinstance(state, ObservableDict):
         inner = state._wrapped
         return {k: unwrap(v) for k, v in inner.items()}
@@ -114,13 +116,14 @@ def unwrap(state):
         inner = state._wrapped
         return [unwrap(v) for v in inner]
     elif isclass(state) and hasattr(state, 'is_wrapped') and state.is_wrapped:
-        return state
+        print(f'Unwrapping class {state}')
+        return {k: unwrap(v) for k, v in state.__dict__.items()}
     elif isinstance(state, dict):
         return {k: unwrap(v) for k, v in state.items()}
     elif isinstance(state, list):
         return [unwrap(v) for v in state]
     elif isclass(state):
-        return {k: unwrap(v) for k, v in state.__dict__.items()}
+        return state
     else:
         return state
 

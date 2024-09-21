@@ -15,9 +15,15 @@ class Storage:
         query = """
         INSERT INTO state (id, data)
         VALUES (0, %s)
+        ON CONFLICT (id) DO UPDATE
+        SET data = EXCLUDED.data;
         """
+
+        unwrapped = unwrap(state)
         
-        serialized = serialize(unwrap(state))
+        print(f'Unwrapped state for storage: {unwrapped}')
+        
+        serialized = serialize(unwrapped)
         
         with psycopg2.connect(DATABASE_URL) as conn:
             with conn.cursor() as cursor:
@@ -28,7 +34,7 @@ class Storage:
         """Creates the main table: state using the library of choice, psycopg2"""
     
         query_table = """
-        CREATE TABLE state (
+        CREATE TABLE IF NOT EXISTS state (
             id SERIAL PRIMARY KEY,
             data JSONB NOT NULL
         );
