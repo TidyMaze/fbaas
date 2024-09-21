@@ -145,7 +145,7 @@ def test_assign_list_item_scalar():
     state, obs = build_state()
     state['b'][0]['c'] = 5
     assert state._wrapped == {'a': 1, 'b': [{'c': 5, 'd': 4}], 'e': {'f': 6}}
-    assert obs.notified_diff == {'values_changed': {"root['b'][0]['c']": {'new_value': 5, 'old_value': 3}}}
+    assert obs.notified_diff == {'values_changed': {"root['c']": {'new_value': 5, 'old_value': 3}}}
 
 
 def test_assign_list_item_list():
