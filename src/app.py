@@ -107,6 +107,7 @@ def create_database():
 def initialize_storage():
     """Initializes the storage (database): creates the tables, etc."""
     create_database()
+    print('Storage initialized')
 
 initialize_storage()
 

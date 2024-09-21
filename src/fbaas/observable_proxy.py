@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from copy import deepcopy
 from idlelib.configdialog import is_int
-from inspect import unwrap
+from inspect import unwrap, isclass
 
 from deepdiff import DeepDiff
 
@@ -32,6 +32,30 @@ class ObservableDict:
     def __repr__(self):
         return f'ObservableDict({self._wrapped})'
 
+class ObservableClass:
+    def __init__(self, wrapped, observer):
+        self._observer = observer
+        self._wrapped = wrapped
+
+    def __setattr__(self, key, value):
+        old_state_unwrapped = unwrap(deepcopy(self._wrapped))
+        self._wrapped.__setattr__(key, wrap(value, self._observer))
+        new_state_unwrapped = unwrap(self._wrapped)
+        self._notify(old_state_unwrapped, new_state_unwrapped)
+
+    def __getattr__(self, key):
+        return self._wrapped.__getattribute__(key)
+
+    def _notify(self, old_state, new_state):
+        print(f'Notifying changes: {old_state} -> {new_state}')
+        diff = DeepDiff(old_state, new_state)
+        self._observer.notify(diff)
+
+    def __eq__(self, other):
+        return self._wrapped == other
+
+    def __repr__(self):
+        return f'ObservableClass({self._wrapped})'
 
 class ObservableList:
     def __init__(self, wrapped, observer):
@@ -59,7 +83,7 @@ class ObservableList:
         return f'ObservableList({self._wrapped})'
     
 def is_wrapped(state):
-    return isinstance(state, ObservableDict) or isinstance(state, ObservableList)
+    return isinstance(state, ObservableDict) or isinstance(state, ObservableList) or isinstance(state, ObservableClass)
 
 
 def wrap(state, observer):
@@ -73,7 +97,10 @@ def wrap(state, observer):
     elif isinstance(state, list):
         print(f'Wrapping state {state} in ObservableList')
         return ObservableList(state, observer)
-    elif is_int(state) or isinstance(state, str):
+    elif isclass(state):
+        print(f'Wrapping state {state} in ObservableClass')
+        return ObservableClass(state, observer)
+    elif isinstance(state, int) or isinstance(state, str):
         print(f'Keeping state {state} as is (scalar)')
         return state
     else:
@@ -86,6 +113,9 @@ def unwrap(state):
     elif isinstance(state, ObservableList):
         inner = state._wrapped
         return [unwrap(v) for v in inner]
+    elif isinstance(state, ObservableClass):
+        inner = state._wrapped
+        return inner
     elif isinstance(state, dict):
         return {k: unwrap(v) for k, v in state.items()}
     elif isinstance(state, list):
