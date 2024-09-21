@@ -1,15 +1,3 @@
-# goal of this project is to create a backend as a service (similar to function as a service), with a state that is 
-# automatically synchronised with a storage (database or nosql) every time the state changes in pytho code or in the storage.
-# Architecture decisions:
-# 1. The backend will be a REST API
-# 2. The user can define a state in the code, annotated with the @state annotation
-# 3. The user can define endpoints (functions), annotated with the HTTP method and the path
-# 4. Annotations are used to define the state and the endpoints
-# 5. The state will be automatically synchronised with the storage every time it changes
-# 6. The storage will be a database or a nosql
-# 7. The user doesn't need to write any code to synchronise the state with the storage
-# 8. The user doesn't need to know the storage technology
-
 import fbaas.annotations
 from fbaas.fbaas import start
 from fbaas.observable_proxy import unwrap
