@@ -13,6 +13,7 @@ import flask.app
 import psycopg2
 
 import fbaas.annotations
+from fbaas.observable_proxy import unwrap
 from fbaas.storage import Storage
 
 
@@ -37,18 +38,18 @@ print(f'Initial state: {my_state.__dict__}')
 
 @fbaas.annotations.get("/users")
 def get_users():
-    return my_state.users
+    return unwrap(my_state.users)
 
 
 @fbaas.annotations.post("/users")
 def create_user(user):
     my_state.users.append(user)
-    return my_state.users
+    return unwrap(my_state.users)
 
 @fbaas.annotations.delete("/user/<name>")
 def delete_user(name):
     my_state.users = [user for user in my_state.users if user["name"] != name]
-    return my_state.users
+    return unwrap(my_state.users)
 
 
 # decorators add the function to the endpoints list

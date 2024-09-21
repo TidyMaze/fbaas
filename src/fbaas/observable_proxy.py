@@ -45,6 +45,12 @@ class ObservableList:
 
     def __getitem__(self, key):
         return self._wrapped[key]
+    
+    def append(self, value):
+        old_state_unwrapped = unwrap(deepcopy(self._wrapped))
+        self._wrapped.append(wrap(value, self._observer))
+        new_state_unwrapped = unwrap(self._wrapped)
+        self._notify(old_state_unwrapped, new_state_unwrapped)
 
     def _notify(self, old_state, new_state):
         print(f'Notifying changes: {old_state} -> {new_state}')
