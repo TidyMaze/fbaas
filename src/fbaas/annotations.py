@@ -1,6 +1,7 @@
 from inspect import isclass, isbuiltin
 
 from fbaas.observable_proxy import wrap, unwrap, Observer
+from fbaas.storage import Storage
 
 endpoints = []
     
@@ -21,7 +22,7 @@ def state():
     def decorator(cls):
         print(f'Registering state {cls.__name__}')
         
-        storage = {}
+        storage = Storage.get_instance()
         
         obs = StateObserver(cls, storage)
     

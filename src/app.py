@@ -13,6 +13,8 @@ import flask.app
 import psycopg2
 
 import fbaas.annotations
+from fbaas.storage import Storage
+
 
 # Exemple of usage:
 
@@ -86,29 +88,7 @@ for path, methods in rules.items():
     
     app.add_url_rule(path, view_func=create_view_func(path, methods), methods=all_methods)
 
-def create_database():
-    """Creates the main table: state using the library of choice, psycopg2"""
-    DATABASE_URL = "postgresql://postgres:postgres@localhost:5432/postgres"
-    
-    query_table = """
-    CREATE TABLE state (
-        id SERIAL PRIMARY KEY,
-        data JSONB
-    );
-    """
-    with psycopg2.connect(DATABASE_URL) as conn:
-        conn.autocommit = True
-        with conn.cursor() as cursor:
-            cursor.execute(query_table)
-            
-    
-    
-
-def initialize_storage():
-    """Initializes the storage (database): creates the tables, etc."""
-    create_database()
-    print('Storage initialized')
-
-initialize_storage()
+storage = Storage()
+storage.init()
 
 app.run()
