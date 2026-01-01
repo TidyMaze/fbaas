@@ -23,17 +23,6 @@ def serialize(data):
     
     print(f'Serializing {data}')
     
-    if isclass(data):
-        as_dict = dict(data.__dict__)
-        print(f'Class serialized as {as_dict}')
-        
-        # filter out all fields starting with __ (recursive)
-        cleaned_for_dunder = {k: v for k, v in as_dict.items() if not k.startswith('__')}
-        
-        print(f'Class serialized (after cleaning) as {cleaned_for_dunder}')
-        
-        return json.dumps(cleaned_for_dunder)
-    
     return json.dumps(clean_for_dunder(data))
 
 def deserialize(data):
